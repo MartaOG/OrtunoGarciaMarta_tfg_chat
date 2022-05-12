@@ -7,9 +7,9 @@
 (defn multiply [a b] (* a b))
 
 (def info {
-           :text "Client side"
-           :message ""
-           })
+  :text "Client side"
+  :message ""
+})
 (defonce app-state (atom info))
 
 (defn get-app-element []

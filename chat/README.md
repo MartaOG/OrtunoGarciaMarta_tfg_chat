@@ -10,7 +10,7 @@ FIXME: Write a paragraph about the library/project and highlight its goals.
 
 To get an interactive development environment run:
 
-    clojure -A:fig:build
+    clojure -M:fig:build
 
 This will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
