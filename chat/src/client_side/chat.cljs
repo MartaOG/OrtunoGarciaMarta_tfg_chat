@@ -6,11 +6,16 @@
 
 (defn multiply [a b] (* a b))
 
-(def info {
-  :text "Client side"
-  :message ""
-})
+(def info {:text "Client side"})
+
+;;To capt message we save the text here.
+(def msg {:message ""})
+
+;;To save all message between dif users.
+(def chat-history {:conversation []})
+
 (defonce app-state (atom info))
+(defonce message (atom msg))
 
 (defn get-app-element []
   (gdom/getElement "app"))
@@ -18,16 +23,16 @@
 (defn main []
   [:div
    [:h1 (:text @app-state)]
-   [write-message]
-   [button-to-send]])
+   [write-message []]
+   [button-to-send []]])
 
 (defn write-message []
   [:div {:class "input-client-message"}
    [:h3 "Say 'Hi!'"]
    [:input {:type :text
             :placeholder "Write here your message"
-            :value (:message @app-state)
-            :on-change #(swap! app-state assoc :message (-> % .-target .-value))}]
+            :value (:message @message)
+            :on-change #(swap! message assoc :message (-> % .-target .-value))}]
    ])
 
 (defn button-to-send []
@@ -35,7 +40,7 @@
    [:button {:on-click send-message} "Send"]])
 
 (defn send-message []
-  (println @app-state))
+  (println @message))
 
 (defn mount [el]
   (rdom/render [main] el))
