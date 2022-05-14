@@ -15,7 +15,7 @@
 (defn get-app-element []
   (gdom/getElement "app"))
 
-(defn hello-world []
+(defn main []
   [:div
    [:h1 (:text @app-state)]
    [write-message]
@@ -38,7 +38,7 @@
   (println @app-state))
 
 (defn mount [el]
-  (rdom/render [hello-world] el))
+  (rdom/render [main] el))
 
 (defn mount-app-element []
   (when-let [el (get-app-element)]
