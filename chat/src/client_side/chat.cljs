@@ -23,8 +23,7 @@
 (defn main []
   [:div
    [:h1 (:text @app-state)]
-   [write-message []]
-   [button-to-send []]])
+   [write-msg []]])
 
 (defn write-message []
   [:div {:class "input-client-message"}
@@ -35,12 +34,30 @@
             :on-change #(swap! message assoc :message (-> % .-target .-value))}]
    ])
 
+(defn write-msg []
+  (let [field (atom nil)]
+    (fn []
+      [:div {:class "text-input"}
+       [:form
+        {:on-submit (fn [x]
+                      (.preventDefault x)
+                      (when-let [msg @field] (println msg))
+                      (reset! field nil))}
+        [:div {:style {:display "flex"
+                       :flex-direction "column"}}
+         [:input {:type "text"
+                  :value @field
+                  :placeholder "Write here your message"
+                  :on-change #(reset! field (-> % .-target .-value))}]
+         [:button (button-to-send) "Send"]]]])))
+
 (defn button-to-send []
   [:div {:class "btn-client-sender"}
-   [:button {:on-click send-message} "Send"]])
+   [:button {:type "submit"
+             :on-click send-message} "Send"]])
 
-(defn send-message []
-  (println @message))
+(defn send-message [msg]
+  (println msg))
 
 (defn mount [el]
   (rdom/render [main] el))
