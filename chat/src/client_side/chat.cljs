@@ -25,15 +25,6 @@
    [:h1 (:text @app-state)]
    [write-msg []]])
 
-(defn write-message []
-  [:div {:class "input-client-message"}
-   [:h3 "Say 'Hi!'"]
-   [:input {:type :text
-            :placeholder "Write here your message"
-            :value (:message @message)
-            :on-change #(swap! message assoc :message (-> % .-target .-value))}]
-   ])
-
 (defn write-msg []
   (let [field (atom nil)]
     (fn []
@@ -49,12 +40,12 @@
                   :value @field
                   :placeholder "Write here your message"
                   :on-change #(reset! field (-> % .-target .-value))}]
-         [:button (button-to-send) "Send"]]]])))
+         (button-to-send [field])]]])))
 
-(defn button-to-send []
+(defn button-to-send [msg]
   [:div {:class "btn-client-sender"}
    [:button {:type "submit"
-             :on-click send-message} "Send"]])
+             :on-click msg} "Send"]])
 
 (defn send-message [msg]
   (println msg))
