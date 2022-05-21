@@ -4,8 +4,6 @@
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]))
 
-(defn multiply [a b] (* a b))
-
 (def info {:text "Client side"})
 
 ;;To capt message we save the text here.
@@ -46,9 +44,6 @@
   [:div {:class "btn-client-sender"}
    [:button {:type "submit"
              :on-click msg} "Send"]])
-
-(defn send-message [msg]
-  (println msg))
 
 (defn mount [el]
   (rdom/render [main] el))
