@@ -18,11 +18,6 @@
 (defn get-app-element []
   (gdom/getElement "app"))
 
-(defn button-to-send [msg]
-  [:div {:class "btn-client-sender"}
-   [:button {:type "submit"
-             :on-click msg} "Send"]])
-
 (defn write-msg []
   (let [field (atom nil)]
     (fn []
@@ -40,6 +35,10 @@
                   :on-change #(reset! field (-> % .-target .-value))}]
          (button-to-send [field])]]])))
 
+(defn button-to-send [msg]
+  [:div {:class "btn-client-sender"}
+   [:button {:type "submit"
+             :on-click msg} "Send"]])
 (defn main []
   [:div
    [:h1 (:text @app-state)]
