@@ -7,21 +7,21 @@
 (def info {:text "Client side"})
 
 ;;To capt message we save the text here.
-(def msg {:message ""})
+;(def msg {:message ""})
 
 ;;To save all message between dif users.
 (def chat-history {:conversation []})
 
 (defonce app-state (atom info))
-(defonce message (atom msg))
+;(defonce message (atom msg))
 
 (defn get-app-element []
   (gdom/getElement "app"))
 
-(defn main []
-  [:div
-   [:h1 (:text @app-state)]
-   [write-msg []]])
+(defn button-to-send [msg]
+  [:div {:class "btn-client-sender"}
+   [:button {:type "submit"
+             :on-click msg} "Send"]])
 
 (defn write-msg []
   (let [field (atom nil)]
@@ -40,10 +40,10 @@
                   :on-change #(reset! field (-> % .-target .-value))}]
          (button-to-send [field])]]])))
 
-(defn button-to-send [msg]
-  [:div {:class "btn-client-sender"}
-   [:button {:type "submit"
-             :on-click msg} "Send"]])
+(defn main []
+  [:div
+   [:h1 (:text @app-state)]
+   [write-msg []]])
 
 (defn mount [el]
   (rdom/render [main] el))

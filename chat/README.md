@@ -29,7 +29,8 @@ To create a production build run:
 	rm -rf target/public
 	clojure -A:fig:min
 
-
+To stop REPLP:
+    ctr + d
 ## License
 
 Copyright © 2018 FIXME
