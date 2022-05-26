@@ -2,7 +2,8 @@
   (:require
    [goog.dom :as gdom]
    [reagent.core :as reagent :refer [atom]]
-   [reagent.dom :as rdom]))
+   [reagent.dom :as rdom]
+   [cljs.core.async :as async :include-macros true]))
 
 (def info {:text "Client side"})
 
@@ -13,10 +14,16 @@
 (def chat-history {:conversation []})
 
 (defonce app-state (atom info))
-;(defonce message (atom msg))
+(defonce send-chan (async/chan))
+(defonce chat-history (atom []))
+(def user "Marta")                                          ; to do trials
 
-(defn get-app-element []
-  (gdom/getElement "app"))
+
+;;USER INTERACTION
+(defn button-to-send [msg]
+  [:div {:class "btn-client-sender"}
+   [:button {:type "submit"
+             :on-click msg} "Send"]])
 
 (defn write-msg []
   (let [field (atom nil)]
@@ -35,11 +42,69 @@
                   :on-change #(reset! field (-> % .-target .-value))}]
          (button-to-send [field])]]])))
 
-(defn button-to-send [msg]
-  [:div {:class "btn-client-sender"}
-   [:button {:type "submit"
-             :on-click msg} "Send"]])
+
+;;WEBSOCKETS
+(defn see-chat []
+  (reagent/create-class
+    {:render (fn []
+               [:div {:class "history"}
+                (for [m @chat-history]
+                  ^{:key (:id m)} [:p (str (:msg m))])])
+     :component-did-update (fn [this]
+                             (let [node (reagent this)]
+                               (set! (.-scrollTop node) (.-scrollHeight node))))}))
+
+(defn send-chat
+  [server]
+  (async/go-loop []
+                 (when-let [msg (async/<! send-chan)]
+                   (async/>! server msg)
+                   (recur))))
+
+(defn show-chat []
+  (reagent/create-class
+    {:render (fn []
+               [:div (for [message @chat-history]
+                       ^{:key (:id message)}
+                       [:p (str (:msg message))])])}))
+
+(defn send-message [msg]
+  (async/put! send-chan msg))
+
+(defn receive-msgs
+  [svr-chan]
+  (async/go-loop []
+                 (if-let [new-msg (:message (<! svr-chan))]
+                   (do
+                     (case (:m-type new-msg)
+                       :chat (swap! chat-history conj (dissoc new-msg :m-type)))
+                     (recur))
+                   (println "Websocket closed"))))
+
+(defn setup-websockets! []
+  (async/go
+    (let [{:keys [ws-channel error]} (async/<! (ws-ch ws-url))]
+      (if error
+        (println "Something went wrong with the websocket")
+        (do
+          (send-message {:msg (@app-state)})
+          (send-chat ws-channel)
+          (receive-msgs ws-channel))))))
+
+;;MAIN
+(defn chat-view []
+  [:div {:class "chat-container"}
+   [see-chat]
+   [write-msg]
+   [:div
+    [:h3 "core.async chat room"]]
+   ])
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
 (defn main []
+  (setup-websockets!)
   [:div
    [:h1 (:text @app-state)]
    [write-msg []]])
