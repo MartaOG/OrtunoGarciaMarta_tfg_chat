@@ -25,6 +25,9 @@
    [:button {:type "submit"
              :on-click msg} "Send"]])
 
+(defn send-message [msg]
+  (async/put! send-chan msg))
+
 (defn write-msg []
   (let [field (atom nil)]
     (fn []
@@ -32,7 +35,9 @@
        [:form
         {:on-submit (fn [x]
                       (.preventDefault x)
-                      (when-let [msg @field] (println msg))
+                      (when-let [msg @field] (send-msg {:msg msg
+                                                        :user (:user @app-state)
+                                                        :m-type :chat}))
                       (reset! field nil))}
         [:div {:style {:display "flex"
                        :flex-direction "column"}}
