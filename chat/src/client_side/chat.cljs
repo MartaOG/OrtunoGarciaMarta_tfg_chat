@@ -2,7 +2,7 @@
   (:require
    [goog.dom :as gdom]
    [reagent.core :as reagent :refer [atom]]
-   [reagent.dom :as rdom]
+   [chord.client :refer [ws-ch]]
    [cljs.core.async :as async :include-macros true]))
 
 (def info {:text "Client side"})
@@ -35,9 +35,7 @@
        [:form
         {:on-submit (fn [x]
                       (.preventDefault x)
-                      (when-let [msg @field] (send-msg {:msg msg
-                                                        :user (:user @app-state)
-                                                        :m-type :chat}))
+                      (when-let [msg @field] (send-message msg))
                       (reset! field nil))}
         [:div {:style {:display "flex"
                        :flex-direction "column"}}
@@ -53,10 +51,10 @@
   (reagent/create-class
     {:render (fn []
                [:div {:class "history"}
-                (for [m @chat-history]
-                  ^{:key (:id m)} [:p (str (:msg m))])])
+                (for [one-msg @chat-history]
+                  ^{:key (:id one-msg)} [:p (str (:user one-msg) ": " (:msg one-msg))])])
      :component-did-update (fn [this]
-                             (let [node (reagent this)]
+                             (let [node (reagent/dom-node this)]
                                (set! (.-scrollTop node) (.-scrollHeight node))))}))
 
 (defn send-chat
@@ -112,6 +110,7 @@
   (setup-websockets!)
   [:div
    [:h1 (:text @app-state)]
+   [see-chat]
    [write-msg []]])
 
 (defn mount [el]
