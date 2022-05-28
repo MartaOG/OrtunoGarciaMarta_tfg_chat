@@ -1,13 +1,9 @@
 (ns ^:figwheel-hooks client-side.chat
   (:require
-   [goog.dom :as gdom]
-   [reagent.core :as reagent :refer [atom]]
-<<<<<<< HEAD
-   [chord.client :refer [ws-ch]]
-   [cljs.core.async :as async :include-macros true]))
-=======
-   [reagent.dom :as rdom]))
->>>>>>> parent of 8022fbd (Two session OK)
+    [goog.dom :as gdom]
+    [reagent.core :as reagent :refer [atom]]
+    [reagent.dom :as rdom]
+    [cljs.core.async :as async :include-macros true]))
 
 (def info {:text "Client side"})
 
@@ -18,13 +14,16 @@
 (def chat-history {:conversation []})
 
 (defonce app-state (atom info))
-;(defonce message (atom msg))
+(defonce send-chan (async/chan))
+(defonce chat-history (atom []))
+(def user "Marta")                                          ; to do trials
 
-(defn get-app-element []
-  (gdom/getElement "app"))
 
-(defn send-message [msg]
-  (async/put! send-chan msg))
+;;USER INTERACTION
+(defn button-to-send [msg]
+  [:div {:class "btn-client-sender"}
+   [:button {:type "submit"
+             :on-click msg} "Send"]])
 
 (defn write-msg []
   (let [field (atom nil)]
@@ -33,7 +32,7 @@
        [:form
         {:on-submit (fn [x]
                       (.preventDefault x)
-                      (when-let [msg @field] (send-message msg))
+                      (when-let [msg @field] (println msg))
                       (reset! field nil))}
         [:div {:style {:display "flex"
                        :flex-direction "column"}}
@@ -43,17 +42,16 @@
                   :on-change #(reset! field (-> % .-target .-value))}]
          (button-to-send [field])]]])))
 
-<<<<<<< HEAD
 
 ;;WEBSOCKETS
 (defn see-chat []
   (reagent/create-class
     {:render (fn []
                [:div {:class "history"}
-                (for [one-msg @chat-history]
-                  ^{:key (:id one-msg)} [:p (str (:user one-msg) ": " (:msg one-msg))])])
+                (for [m @chat-history]
+                  ^{:key (:id m)} [:p (str (:msg m))])])
      :component-did-update (fn [this]
-                             (let [node (reagent/dom-node this)]
+                             (let [node (reagent this)]
                                (set! (.-scrollTop node) (.-scrollHeight node))))}))
 
 (defn send-chat
@@ -105,16 +103,10 @@
 (defn get-app-element []
   (gdom/getElement "app"))
 
-=======
-(defn button-to-send [msg]
-  [:div {:class "btn-client-sender"}
-   [:button {:type "submit"
-             :on-click msg} "Send"]])
->>>>>>> parent of 8022fbd (Two session OK)
 (defn main []
+  (setup-websockets!)
   [:div
    [:h1 (:text @app-state)]
-   [see-chat]
    [write-msg []]])
 
 (defn mount [el]
