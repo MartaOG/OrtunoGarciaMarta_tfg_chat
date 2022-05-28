@@ -2,8 +2,12 @@
   (:require
    [goog.dom :as gdom]
    [reagent.core :as reagent :refer [atom]]
+<<<<<<< HEAD
    [chord.client :refer [ws-ch]]
    [cljs.core.async :as async :include-macros true]))
+=======
+   [reagent.dom :as rdom]))
+>>>>>>> parent of 8022fbd (Two session OK)
 
 (def info {:text "Client side"})
 
@@ -14,16 +18,10 @@
 (def chat-history {:conversation []})
 
 (defonce app-state (atom info))
-(defonce send-chan (async/chan))
-(defonce chat-history (atom []))
-(def user "Marta")                                          ; to do trials
+;(defonce message (atom msg))
 
-
-;;USER INTERACTION
-(defn button-to-send [msg]
-  [:div {:class "btn-client-sender"}
-   [:button {:type "submit"
-             :on-click msg} "Send"]])
+(defn get-app-element []
+  (gdom/getElement "app"))
 
 (defn send-message [msg]
   (async/put! send-chan msg))
@@ -45,6 +43,7 @@
                   :on-change #(reset! field (-> % .-target .-value))}]
          (button-to-send [field])]]])))
 
+<<<<<<< HEAD
 
 ;;WEBSOCKETS
 (defn see-chat []
@@ -106,8 +105,13 @@
 (defn get-app-element []
   (gdom/getElement "app"))
 
+=======
+(defn button-to-send [msg]
+  [:div {:class "btn-client-sender"}
+   [:button {:type "submit"
+             :on-click msg} "Send"]])
+>>>>>>> parent of 8022fbd (Two session OK)
 (defn main []
-  (setup-websockets!)
   [:div
    [:h1 (:text @app-state)]
    [see-chat]
