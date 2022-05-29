@@ -7,7 +7,7 @@
 
 (defonce main-chan (async/chan 1 (map #assoc % :id (random-uuid))))
 
-(defone main-mult (assync/mult main-chan))
+(defonce main-mult (async/mult main-chan))
 
 (def users (atom {}))
 
@@ -43,4 +43,8 @@
                                                                    :msg client-id})
                                               (swap! users dissoc client-id)))))))))
 
-;(defroutes app (GET "/ws" [] ws-handler))
+(defroutes app
+           (GET "/ws" [] ws-handler)
+           (GET "/" [] (resp/resource-response "index.html" {:root "public"}))
+           (route/resources "/")
+           (route/not-found "<h1>Page not found</h1>"))
