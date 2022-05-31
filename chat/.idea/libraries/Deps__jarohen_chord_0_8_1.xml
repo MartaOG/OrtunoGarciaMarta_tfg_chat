@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Deps: jarohen/chord:0.8.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/jarohen/chord/0.8.1/chord-0.8.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

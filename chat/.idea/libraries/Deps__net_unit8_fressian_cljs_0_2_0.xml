@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Deps: net.unit8/fressian-cljs:0.2.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/unit8/fressian-cljs/0.2.0/fressian-cljs-0.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

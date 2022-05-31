@@ -1,8 +1,9 @@
 (ns ^:figwheel-hooks client-side.chat
   (:require
     [goog.dom :as gdom]
-    [reagent.core :as reagent :refer [atom]]
+    [reagent.core :as rcore :refer [atom]]
     [reagent.dom :as rdom]
+    [chord.client :as cclient]
     [cljs.core.async :as async :include-macros true]))
 
 (def info {:text "Client side"})
@@ -25,33 +26,15 @@
    [:button {:type "submit"
              :on-click msg} "Send"]])
 
-(defn write-msg []
-  (let [field (atom nil)]
-    (fn []
-      [:div {:class "text-input"}
-       [:form
-        {:on-submit (fn [x]
-                      (.preventDefault x)
-                      (when-let [msg @field] (println msg))
-                      (reset! field nil))}
-        [:div {:style {:display "flex"
-                       :flex-direction "column"}}
-         [:input {:type "text"
-                  :value @field
-                  :placeholder "Write here your message"
-                  :on-change #(reset! field (-> % .-target .-value))}]
-         (button-to-send [field])]]])))
-
-
-;;WEBSOCKETS
 (defn see-chat []
-  (reagent/create-class
-    {:render (fn []
-               [:div {:class "history"}
-                (for [m @chat-history]
-                  ^{:key (:id m)} [:p (str (:msg m))])])
+  (rcore/create-class
+    {:render               (fn []
+                             (for [m @chat-history]
+                               [:p (str (:user m) ": " (:msg m))])
+                             ;(println "Lne 34")
+                             )
      :component-did-update (fn [this]
-                             (let [node (reagent this)]
+                             (let [node (rdom/dom-node this)]
                                (set! (.-scrollTop node) (.-scrollHeight node))))}))
 
 (defn send-chat
@@ -61,15 +44,26 @@
                    (async/>! server msg)
                    (recur))))
 
-(defn show-chat []
-  (reagent/create-class
-    {:render (fn []
-               [:div (for [message @chat-history]
-                       ^{:key (:id message)}
-                       [:p (str (:msg message))])])}))
-
 (defn send-message [msg]
+  (println msg)
   (async/put! send-chan msg))
+
+(defn write-msg []
+  (let [field (atom nil)]
+    (fn []
+      [:div {:class "text-input"}
+       [:form
+        {:on-submit (fn [x]
+                      (.preventDefault x)
+                      (when-let [msg @field] (send-message msg))
+                      (reset! field nil))}
+        [:div {:style {:display "flex"
+                       :flex-direction "column"}}
+         [:input {:type "text"
+                  :value @field
+                  :placeholder "Write here your message"
+                  :on-change #(reset! field (-> % .-target .-value))}]
+         (button-to-send [field])]]])))
 
 (defn receive-msgs
   [svr-chan]
@@ -83,22 +77,13 @@
 
 (defn setup-websockets! []
   (async/go
-    (let [{:keys [ws-channel error]} (async/<! (ws-ch ws-url))]
+    (let [{:keys [ws-channel error]} (async/<! (cclient/ws-ch "http://localhost:9500/ws"))]
       (if error
-        (println "Something went wrong with the websocket")
+        (println "MARTA --> ERROR IN SETUP-WEBSOCKETS!")
         (do
           (send-message {:msg (@app-state)})
           (send-chat ws-channel)
           (receive-msgs ws-channel))))))
-
-;;MAIN
-(defn chat-view []
-  [:div {:class "chat-container"}
-   [see-chat]
-   [write-msg]
-   [:div
-    [:h3 "core.async chat room"]]
-   ])
 
 (defn get-app-element []
   (gdom/getElement "app"))
@@ -107,7 +92,8 @@
   (setup-websockets!)
   [:div
    [:h1 (:text @app-state)]
-   [write-msg []]])
+   [write-msg []]
+   [see-chat []]])
 
 (defn mount [el]
   (rdom/render [main] el))
